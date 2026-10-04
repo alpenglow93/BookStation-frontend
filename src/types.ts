@@ -36,7 +36,7 @@ export interface UserBook {
     platformName: string
     status: ReadingStatus
     rating: number | null
-    purchased_at: string | null
+    purchasedAt: string | null
 }
 
 export interface Recommendation {
