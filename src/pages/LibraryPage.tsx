@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react"
 import axios from "axios"
 import type { UserBook, ReadingStatus } from "../types.ts"
-import { STATUS_LABEL } from "../constants.ts";
+import { STATUS_LABEL } from "../constants.ts"
 import { clearRecommendCache } from '../recommendCache.ts'
+import BookDetailModal from "../components/BookDetailModal.tsx"
 
 type Filter = ReadingStatus | 'ALL'
 const CATEGORY_GROUPS = ['로판', '로맨스', '판타지']
@@ -19,6 +20,7 @@ function LibraryPage() {
     const [categoryFilter, setCategoryFilter] = useState('ALL')
     const [platformFilter, setPlatformFilter] = useState('ALL')
     const [search, setSearch] = useState('')
+    const [selected, setSelected] = useState<UserBook | null>(null)
 
     const loadLibrary = () => {
         axios.get<{ list: UserBook[] }>('/api/library')
@@ -111,12 +113,14 @@ function LibraryPage() {
             <ul className="book-grid">
                 {filtered.map(b=> (
                     <li key={b.id} className="book-card">
-                        <div className="cover">
-                            {b.coverUrl && <img src={b.coverUrl} alt=""/>}
-                            <span className="ribbon" data-status={b.status} title={STATUS_LABEL[b.status]}/>
-                        </div>
+                        <button className="card-open" onClick={() => setSelected(b)}>
+                            <div className="cover">
+                                {b.coverUrl && <img src={b.coverUrl} alt=""/>}
+                                <span className="ribbon" data-status={b.status} title={STATUS_LABEL[b.status]} />
+                            </div>
+                            <div className="book-title">{b.title}</div>
+                        </button>
 
-                        <div className="book-title">{b.title}</div>
                         <div className="book-meta">{b.author ?? '작가 미상'}</div>
                         {b.category && <div className="book-meta">{b.category}</div>}
                         <div className="book-meta">{b.platformName}</div>
@@ -144,6 +148,9 @@ function LibraryPage() {
                     </li>
                 ))}
             </ul>
+            {selected && (
+                <BookDetailModal userBook={selected} onClose={() => setSelected(null)} onSaved={loadLibrary} key={selected.id}/>
+            )}
         </div>
     )
 }

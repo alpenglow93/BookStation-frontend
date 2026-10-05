@@ -243,3 +243,55 @@ button, select, input { font: inherit; color: inherit; }
   margin-bottom: 16px;
 }
 .filter-bar .search { flex: 1; min-width: 200px; max-width: 320px; }
+
+/* 카드 열기 버튼 */
+.card-open {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0;
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+/* 상세 모달 */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(31, 39, 51, 0.45);
+}
+.modal {
+  width: 100%;
+  max-width: 680px;
+  max-height: 90vh;
+  overflow: auto;
+  padding: 28px;
+  display: grid;
+  grid-template-columns: 130px 1fr;
+  gap: 24px;
+  background: var(--surface);
+  border-radius: 8px;
+}
+.modal-title { margin: 0 0 6px; font-size: 1.25rem; }
+.synopsis {
+  margin: 16px 0 0;
+  max-width: 60ch;
+  white-space: pre-line;
+  font-size: 0.95rem;
+  line-height: 1.75;
+}
+.modal-memo { grid-column: 1 / -1; display: flex; flex-direction: column; gap: 6px; }
+.modal-memo textarea { min-height: 100px; resize: vertical; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 4px; }
+
+@media (max-width: 600px) {
+  .modal { grid-template-columns: 1fr; }
+  .modal .cover { max-width: 140px; }
+}

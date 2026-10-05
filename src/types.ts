@@ -36,6 +36,7 @@ export interface UserBook {
     platformName: string
     status: ReadingStatus
     rating: number | null
+    memo: string | null
     purchasedAt: string | null
 }
 
