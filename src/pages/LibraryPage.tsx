@@ -5,6 +5,7 @@ import { STATUS_LABEL } from "../constants.ts";
 import { clearRecommendCache } from '../recommendCache.ts'
 
 type Filter = ReadingStatus | 'ALL'
+const CATEGORY_GROUPS = ['로판', '로맨스', '판타지']
 const FILTERS: Filter[] = ['ALL', 'WISHLIST', 'UNREAD', 'READING', 'COMPLETED', 'DROPPED']
 const STATUSES: ReadingStatus[] = ['WISHLIST', 'UNREAD', 'READING', 'COMPLETED', 'DROPPED']
 const canRate = (s: ReadingStatus) =>
@@ -15,6 +16,9 @@ function LibraryPage() {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(false)
     const [filter, setFilter] = useState<Filter>('ALL')
+    const [categoryFilter, setCategoryFilter] = useState('ALL')
+    const [platformFilter, setPlatformFilter] = useState('ALL')
+    const [search, setSearch] = useState('')
 
     const loadLibrary = () => {
         axios.get<{ list: UserBook[] }>('/api/library')
@@ -44,12 +48,49 @@ function LibraryPage() {
     if(error) return <p>서재를 불러오지 못했어요.</p>
     if(books.length === 0) return <p>아직 서재에 등록한 책이 없어요.</p>
 
-    const filtered = filter === 'ALL' ? books : books.filter(b => b.status === filter)
-    const countOf = (f: Filter) => (f === 'ALL' ? books.length : books.filter(b => b.status === f).length)
+    const keyword = search.trim().toLowerCase()
+    const platformNames = Array.from(new Set(books.map(b => b.platformName)))
+
+    const base = books.filter(b =>
+        (categoryFilter === 'ALL' || (b.category ?? '').startsWith(categoryFilter)) &&
+        (platformFilter === 'ALL' || b.platformName === platformFilter) &&
+        (keyword === '' || b.title.toLowerCase().includes(keyword))
+    )
+
+    const filtered = filter === 'ALL' ? base : base.filter(b => b.status === filter)
+    const countOf = (f: Filter) => (f === 'ALL' ? base.length : base.filter(b => b.status === f).length)
+
+    const isFiltering = categoryFilter !== 'ALL' || platformFilter !== 'ALL' || keyword !== ''
+    const resetFilters = () => {
+        setCategoryFilter('ALL')
+        setPlatformFilter('ALL')
+        setSearch('')
+    }
+
 
     return (
         <div>
             <h2 className="page-title">내 서재 (총 {books.length}권)</h2>
+
+            <div className="filter-bar">
+                <input
+                    className="field search"
+                    value={search}
+                    onChange={e => setSearch(e.target.value)}
+                    placeholder="서재에서 제목 찾기"
+                />
+                <select className="field" value={categoryFilter} onChange={e => setCategoryFilter(e.target.value)}>
+                    <option value="ALL">모든 카테고리</option>
+                    {CATEGORY_GROUPS.map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
+                <select className="field" value={platformFilter} onChange={e => setPlatformFilter(e.target.value)}>
+                    <option value="ALL">모든 플랫폼</option>
+                    {platformNames.map(p => <option key={p} value={p}>{p}</option>)}
+                </select>
+                {isFiltering && (
+                    <button className="text-button" onClick={resetFilters}>필터 초기화</button>
+                )}
+            </div>
 
             <div className="tabs">
                 {FILTERS.map(f => (
@@ -65,7 +106,7 @@ function LibraryPage() {
                 ))}
             </div>
 
-            {filtered.length === 0 && <p className="notice">이 상태의 책이 없어요.</p>}
+            {filtered.length === 0 && <p className="notice">조건에 맞는 책이 없어요.</p>}
 
             <ul className="book-grid">
                 {filtered.map(b=> (
