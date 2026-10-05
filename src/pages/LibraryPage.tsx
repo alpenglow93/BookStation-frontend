@@ -49,52 +49,57 @@ function LibraryPage() {
 
     return (
         <div>
-            <h2>내 서재 ({books.length}권)</h2>
+            <h2 className="page-title">내 서재 (총 {books.length}권)</h2>
 
-            <div style={{ marginBottom: 16}}>
+            <div className="tabs">
                 {FILTERS.map(f => (
-                    <button key={f} disabled={filter === f} onClick={() => setFilter(f)}>
-                        {f == 'ALL' ? '전체' : STATUS_LABEL[f]} ({countOf(f)})
+                    <button
+                        key={f}
+                        className="tab"
+                        aria-pressed={filter === f}
+                        onClick={() => setFilter(f)}
+                    >
+                        {f !== 'ALL' && <span className="swatch" data-status={f}/>}
+                        {f === 'ALL' ? '전체' : STATUS_LABEL[f]} ({countOf(f)})
                     </button>
                 ))}
             </div>
 
-            {filtered.length === 0 && <p>이 상태의 책이 없어요.</p>}
+            {filtered.length === 0 && <p className="notice">이 상태의 책이 없어요.</p>}
 
-            <ul style={{
-                listStyle: 'none',
-                padding: 0,
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
-                gap: 16
-            }}>
+            <ul className="book-grid">
                 {filtered.map(b=> (
-                    <li key={b.id}>
-                        {b.coverUrl && (
-                            <img src={b.coverUrl} alt={b.title} style={{width: '100%'}}/>
-                        )}
-                        <strong>{b.title}</strong>
-                        <div>{b.author ?? '작가 미상'}</div>
-                        <div>{b.platformName}{b.purchasedAt && ` · ${b.purchasedAt}`}</div>
-                        {b.category && <div style={{ fontSize: 12, color: 'gray'}}>{b.category}</div>}
+                    <li key={b.id} className="book-card">
+                        <div className="cover">
+                            {b.coverUrl && <img src={b.coverUrl} alt=""/>}
+                            <span className="ribbon" data-status={b.status} title={STATUS_LABEL[b.status]}/>
+                        </div>
 
-                        <select
-                            value={b.status}
-                            onChange={e => updateBook(b.id, { status: e.target.value as ReadingStatus})}
-                        >
-                            {STATUSES.map(s => <option key={s} value={s}>{STATUS_LABEL[s]}</option>)}
-                        </select>
+                        <div className="book-title">{b.title}</div>
+                        <div className="book-meta">{b.author ?? '작가 미상'}</div>
+                        {b.category && <div className="book-meta">{b.category}</div>}
+                        <div className="book-meta">{b.platformName}</div>
+                        {b.purchasedAt && <div className="book-meta">{b.purchasedAt} 구매</div>}
 
-                        <select
-                            value={b.rating ?? ''}
-                            disabled={!canRate(b.status)}
-                            onChange={e => updateBook(b.id, { rating: Number(e.target.value) })}
-                        >
-                            <option value="" disabled>평점</option>
-                            {[5,4,3,2,1].map(r => <option key={r} value={r}>{'★'.repeat(r)}</option>)}
-                        </select>
+                        <div className="book-actions">
+                            <select
+                                value={b.status}
+                                onChange={e => updateBook(b.id, { status: e.target.value as ReadingStatus})}
+                            >
+                                {STATUSES.map(s => <option key={s} value={s}>{STATUS_LABEL[s]}</option>)}
+                            </select>
 
-                        <button onClick={() => deleteBook(b.id, b.title)}>삭제</button>
+                            <select
+                                value={b.rating ?? ''}
+                                disabled={!canRate(b.status)}
+                                onChange={e => updateBook(b.id, { rating: Number(e.target.value) })}
+                            >
+                                <option value="" disabled>평점</option>
+                                {[5,4,3,2,1].map(r => <option key={r} value={r}>{'★'.repeat(r)}</option>)}
+                            </select>
+
+                            <button className="text-button danger" onClick={() => deleteBook(b.id, b.title)}>삭제</button>
+                        </div>
                     </li>
                 ))}
             </ul>

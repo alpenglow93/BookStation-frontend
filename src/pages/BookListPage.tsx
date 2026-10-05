@@ -14,7 +14,7 @@ function BookListPage() {
     const [query, setQuery] = useState('')
     const [page, setPage] = useState(1)
     const [data, setData] = useState<BookListResponse | null>(null)
-    const [loading, setLoading] = useState(false)
+    const [loading, setLoading] = useState(true)
 
     // 등록 옵션
     const [platforms, setPlatforms] = useState<Platform[]>([])
@@ -33,17 +33,25 @@ function BookListPage() {
 
     // page나 query가 바뀔 때마다: 도서 목록
     useEffect(() => {
-        setLoading(true)
         axios.get<BookListResponse>('/api/books', { params: { page, keyword: query}})
             .then(res => setData(res.data))
             .catch(err => console.error(err))
             .finally(() => setLoading(false))
     }, [page, query]);
 
+    const goToPage = (p: number) => {
+        if (p === page) return
+        setLoading(true)
+        setPage(p)
+    }
+
     const handleSearch = (e: SubmitEvent) => {
         e.preventDefault()
+        const q = keyword.trim()
+        if(q === query && page === 1) return
+        setLoading(true)
         setPage(1)
-        setQuery(keyword.trim())
+        setQuery(q)
     }
 
     const handleAdd = (book: Book) => {
@@ -66,53 +74,78 @@ function BookListPage() {
 
     return (
         <div>
-            <h2>도서 검색</h2>
+            <h2 className="page-title">도서 검색</h2>
 
-            <form onSubmit={handleSearch}>
-                <input value={keyword} onChange={ e => setKeyword(e.target.value) }
-                       placeholder="제목으로 검색" />
-                <button type="submit">검색</button>
+            <form className="search-bar" onSubmit={handleSearch}>
+                <input
+                    className="field"
+                    value={keyword}
+                    onChange={e => setKeyword(e.target.value)}
+                    placeholder="제목으로 검색"
+                />
+                <button type="submit" className="button">검색</button>
             </form>
 
-            <div style={{margin: '12px 0'}}>
-                구매처{' '}
-                <select value={platformId ?? ''} onChange={e => setPlatformId(Number(e.target.value))}>
-                    {platforms.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-                </select>{' '}
-                상태{' '}
-                <select value={status} onChange={e=>setStatus(e.target.value as ReadingStatus)}>
-                    {ADD_STATUSES.map(s=> <option key={s} value={s}>{STATUS_LABEL[s]}</option>)}
-                </select>
+            <div className="add-options">
+                <label>
+                    구매처
+                    <select
+                        className="field"
+                        value={platformId ?? ''}
+                        onChange={e => setPlatformId(Number(e.target.value))}
+                    >
+                        {platforms.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                    </select>
+                </label>
+                <label>
+                    담을 때 상태
+                    <select
+                        className="field"
+                        value={status}
+                        onChange={e => setStatus(e.target.value as ReadingStatus)}
+                    >
+                        {ADD_STATUSES.map(s => <option key={s} value={s}>{STATUS_LABEL[s]}</option>)}
+                    </select>
+                </label>
             </div>
 
-            {loading && <p>불러오는 중...</p>}
-            {!loading && data && data.list.length === 0 && <p>검색 결과가 없어요.</p>}
+            {loading && <p className="notice">불러오는 중...</p>}
+            {!loading && data && data.list.length === 0 && (
+                <p className="notice">'{query}'(으)로 찾은 책이 없어요. 제목 일부만 넣어 보세요.</p>
+            )}
 
-            {data && (
-                <ul style={{
-                    listStyle: 'none', padding: 0, display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 16,
-                }}>
+            {!loading && data && (
+                <ul className="book-grid">
                     {data.list.map(b => (
-                        <li key={b.id}>
-                            {b.cover_url && <img src={b.cover_url} alt={b.title} style={{ width: '100%' }}/>}
-                            <strong>{b.title}</strong>
-                            <div>{b.author ?? '작가 미상'}</div>
-                            {b.category && <div style={{ fontSize: 12, color: 'gray'}}>{b.category}</div>}
-                            <button onClick={()=>handleAdd(b)}>서재에 담기</button>
+                        <li key={b.id} className="book-card">
+                            <div className="cover">
+                                {b.cover_url && <img src={b.cover_url} alt="" />}
+                            </div>
+                            <div className="book-title">{b.title}</div>
+                            <div className="book-meta">{b.author ?? '작가 미상'}</div>
+                            {b.category && <div className="book-meta">{b.category}</div>}
+                            <button className="button secondary small" onClick={() => handleAdd(b)}>
+                                서재에 담기
+                            </button>
                         </li>
                     ))}
                 </ul>
             )}
 
             {data && data.totalpage > 0 && (
-                <div style={{marginTop: 16}}>
-                    <button disabled={page <= 1} onClick={() => setPage(page - 1)}>이전</button>
+                <nav className="pagination" aria-label="페이지">
+                    <button disabled={page <= 1} onClick={() => goToPage(page - 1)}>이전</button>
                     {pageNumbers.map(p => (
-                        <button key={p} disabled={p === page} onClick={() => setPage(p)}>{p}</button>
+                        <button
+                            key={p}
+                            aria-current={p === page ? 'page' : undefined}
+                            onClick={() => goToPage(p)}
+                        >
+                            {p}
+                        </button>
                     ))}
-                    <button disabled={page >= data.totalpage} onClick={() => setPage(page + 1)}>다음</button>
-                </div>
+                    <button disabled={page >= data.totalpage} onClick={() => goToPage(page + 1)}>다음</button>
+                </nav>
             )}
         </div>
     )

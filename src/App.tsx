@@ -7,16 +7,16 @@ function App() {
 
   return (
     <BrowserRouter>
-        <header>
-            <h1>북스테이션</h1>
-            <nav>
-                <NavLink to="/" end>내 서재</NavLink> |{' '}
-                <NavLink to="/books">도서 검색</NavLink> |{' '}
+        <header className="app-header">
+            <h1 className="app-title">북스테이션</h1>
+            <nav className="app-nav">
+                <NavLink to="/" end>내 서재</NavLink>
+                <NavLink to="/books">도서 검색</NavLink>
                 <NavLink to="/recommend">추천</NavLink>
             </nav>
         </header>
 
-        <main>
+        <main className="app-main">
             <Routes>
                 <Route path="/" element={<LibraryPage/>}/>
                 <Route path="/books" element={<BookListPage/>}/>

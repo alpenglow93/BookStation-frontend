@@ -51,13 +51,14 @@ function RecommendPage() {
 
     return (
         <div>
-            <h2>AI 취향 추천</h2>
+            <h2 className="page-title">AI 취향 추천</h2>
 
-            <div style={{ marginBottom: 16}}>
+            <div className="tabs">
                 {CATEGORIES.map(c => (
                     <button
                         key={c.label}
-                        disabled={category === c.value}
+                        className="tab"
+                        aria-pressed={category === c.value}
                         onClick={() => setCategory(c.value)}
                     >
                         {c.label}
@@ -65,55 +66,48 @@ function RecommendPage() {
                 ))}
             </div>
 
-            {loading && <p>취향을 분석하고 추천 이유를 쓰는 중이에요... (몇 초 걸려요)</p>}
+            {loading && <p className="notice">서재를 바탕으로 취향을 분석하고 추천 이유를 쓰는 중이에요. 몇 초 걸려요.</p>}
 
             {!loading && !entry && (
                 <div>
-                    { error && <p>추천을 불러오지 못했어요.</p> }
-                    <button onClick={fetchRecommend}>AI 추천 받기</button>
+                    {error && <p className="notice">추천을 받지 못했어요. 잠시 후 다시 시도해 주세요.</p>}
+                    <p className="notice">내 서재의 책과 평점을 바탕으로 비슷한 작품을 골라 드려요.</p>
+                    <button className="button" onClick={fetchRecommend}>AI 추천 받기</button>
                 </div>
-
             )}
 
             {!loading && entry && (
-
                 <div>
-                    <div style={{ marginBottom: 12, fontSize: 12, color: 'gray' }}>
-                        {entry.savedAt} 기준 추천{' '}
-                        <button onClick={fetchRecommend}>다시 추천받기</button>
+                    <div className="recommend-head">
+                        <span>{entry.savedAt}에 받은 추천</span>
+                        <button className="button secondary small" onClick={fetchRecommend}>다시 추천받기</button>
                     </div>
 
-                {reasonFailed && (
-                <p>AI 서버가 혼잡해서 추천 이유를 만들지 못했어요. 잠시 후 '다시 추천받기'를 눌러 주세요.</p>
-                )}
+                    {reasonFailed && (
+                        <p className="notice">AI 서버가 응답하지 않아 추천 이유를 만들지 못했어요. 잠시 후 '다시 추천받기'를 눌러 주세요.</p>
+                    )}
 
-                {entry.items.length === 0 ? (
-                    <p>이 카테고리의 책을 서재에 담고 평점을 남기면 추천해 드려요.</p>
-                ) : (
-                    <ul style={{listStyle: 'none', padding: 0}}>
-                        {entry.items.map(r => (
-                            <li key={r.bookId} style={{
-                                display: 'flex', gap: 16, padding: '12px 0', borderBottom: '1px solid #ddd'
-                            }}>
-                                <div style={{ width: 90, flexShrink: 0 }}>
-                                    {r.coverUrl && (
-                                        <img src={r.coverUrl} alt={r.title} style={{
-                                            width: '100%', aspectRatio: '2 / 3', objectFit: 'cover'
-                                        }}/>
-                                    )}
-                                </div>
-                                <div style={{ width: 200, flexShrink: 0 }}>
-                                    <strong>{r.title}</strong>
-                                    <div>{r.author ?? '작가 미상'}</div>
-                                    {r.category && <div style={{ fontSize: 12, color: 'gray' }}>{r.category}</div>}
-                                </div>
-                                <div style={{ flex: 1 }}>
-                                    {r.reason ? `💡 ${r.reason}` : <span style={{ color: 'gray'}}>추천 이유 없음</span> }
-                                </div>
-                            </li>
-                        ))}
-                    </ul>
-                )}
+                    {entry.items.length === 0 ? (
+                        <p className="notice">이 카테고리의 책을 서재에 담고 평점을 남기면 추천해 드려요.</p>
+                    ) : (
+                        <ul className="recommend-list">
+                            {entry.items.map(r => (
+                                <li key={r.bookId} className="recommend-row">
+                                    <div className="cover">
+                                        {r.coverUrl && <img src={r.coverUrl} alt="" />}
+                                    </div>
+                                    <div>
+                                        <div className="book-title">{r.title}</div>
+                                        <div className="book-meta">{r.author ?? '작가 미상'}</div>
+                                        {r.category && <div className="book-meta">{r.category}</div>}
+                                    </div>
+                                    <p className={r.reason ? 'recommend-reason' : 'recommend-reason empty'}>
+                                        {r.reason || '추천 이유를 만들지 못했어요.'}
+                                    </p>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
                 </div>
             )}
         </div>
