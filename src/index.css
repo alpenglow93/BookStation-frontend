@@ -295,3 +295,25 @@ button, select, input { font: inherit; color: inherit; }
   .modal { grid-template-columns: 1fr; }
   .modal .cover { max-width: 140px; }
 }
+
+/* 직접 등록 폼 */
+.modal.form-modal {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-width: 560px;
+}
+.form-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.form-row .field { width: 100%; font-size: 1rem; color: var(--ink); }
+.form-row textarea { min-height: 140px; resize: vertical; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+@media (max-width: 600px) {
+  .form-grid { grid-template-columns: 1fr; }
+}

@@ -5,6 +5,7 @@ import axios from "axios";
 import type { Book, BookListResponse, Platform, ReadingStatus } from "../types.ts";
 import { STATUS_LABEL } from "../constants.ts";
 import { clearRecommendCache } from '../recommendCache.ts'
+import ManualBookForm from "../components/ManualBookForm.tsx";
 
 const ADD_STATUSES: ReadingStatus[] = ['UNREAD', 'READING', 'COMPLETED', 'WISHLIST']
 
@@ -15,6 +16,7 @@ function BookListPage() {
     const [page, setPage] = useState(1)
     const [data, setData] = useState<BookListResponse | null>(null)
     const [loading, setLoading] = useState(true)
+    const [showForm, setShowForm] = useState(false)
 
     // 등록 옵션
     const [platforms, setPlatforms] = useState<Platform[]>([])
@@ -86,6 +88,10 @@ function BookListPage() {
                 <button type="submit" className="button">검색</button>
             </form>
 
+            <button className="text-button" onClick={() => setShowForm(true)}>
+                찾는 책이 없나요? 직접 등록하기
+            </button>
+
             <div className="add-options">
                 <label>
                     구매처
@@ -146,6 +152,9 @@ function BookListPage() {
                     ))}
                     <button disabled={page >= data.totalpage} onClick={() => goToPage(page + 1)}>다음</button>
                 </nav>
+            )}
+            {showForm && (
+                <ManualBookForm platforms={platforms} onClose={() => setShowForm(false)} />
             )}
         </div>
     )
