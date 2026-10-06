@@ -2,7 +2,7 @@
 
 여러 플랫폼에 흩어진 웹소설과 e북을 한 서재에서 관리하고, 독서 기록으로 AI 추천을 받는 서비스 **북스테이션**의 프론트엔드입니다.
 
-- 백엔드 저장소: [BookStation-backend](https://github.com/아이디/BookStation-backend) (프로젝트 소개, 추천 설계, API는 이쪽에 정리되어 있습니다)
+- 백엔드 저장소: [BookStation-backend](https://github.com/alpenglow93/BookStation-backend) (프로젝트 소개, 추천 설계, API는 이쪽에 정리되어 있습니다)
 
 <!-- ![내 서재](docs/library.png) -->
 
@@ -15,7 +15,7 @@ React, TypeScript, Vite, axios, react-router-dom
 | 경로 | 화면 | 기능 |
 | --- | --- | --- |
 | `/` | 내 서재 | 상태 탭, 카테고리·플랫폼 필터, 제목 검색, 상태·평점 변경, 삭제, 상세 보기(줄거리, 메모) |
-| `/books` | 도서 검색 | 제목 검색, 페이지 이동, 구매처와 상태를 골라 서재에 담기 |
+| `/books` | 도서 검색 | 제목 검색, 페이지 이동, 구매처와 상태를 골라 서재에 담기, 직접 등록 |
 | `/recommend` | AI 추천 | 카테고리별 추천, 책마다 AI가 쓴 추천 이유 |
 
 ## 구조
@@ -27,7 +27,8 @@ src/
 │  ├─ BookListPage.tsx     도서 검색
 │  └─ RecommendPage.tsx    AI 추천
 ├─ components/
-│  └─ BookDetailModal.tsx  도서 상세, 메모 수정
+│  ├─ BookDetailModal.tsx  도서 상세, 메모 수정
+│  └─ ManualBookForm.tsx  도서 직접 등록
 ├─ types.ts                API 응답 타입
 ├─ constants.ts            상태값 한글 표기
 ├─ recommendCache.ts       추천 결과 저장/무효화
