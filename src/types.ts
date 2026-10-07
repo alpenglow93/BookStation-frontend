@@ -33,6 +33,7 @@ export interface UserBook {
     genre: string | null
     category: string | null
     coverUrl: string | null
+    platformId: number
     platformName: string
     status: ReadingStatus
     rating: number | null

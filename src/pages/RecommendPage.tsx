@@ -3,6 +3,7 @@ import axios from 'axios'
 import type { Recommendation } from "../types.ts"
 import { readCache, writeCache } from "../recommendCache.ts"
 import type { CacheEntry } from "../recommendCache.ts"
+import BookPreviewModal from "../components/BookPreviewModal.tsx";
 
 const CATEGORIES: { label: string; value: string | null}[] = [
     { label: '전체', value: null},
@@ -18,6 +19,7 @@ function RecommendPage() {
     const [cache, setCache] = useState<Record<string, CacheEntry>>(() => readCache())
     const [loadingKey, setLoadingKey] = useState<string | null>(null)
     const [errorKey, setErrorKey] = useState<string | null>(null)
+    const [preview, setPreview] = useState<Recommendation | null>(null)
 
     const key = keyOf(category)
     const entry = cache[key]
@@ -93,14 +95,17 @@ function RecommendPage() {
                         <ul className="recommend-list">
                             {entry.items.map(r => (
                                 <li key={r.bookId} className="recommend-row">
-                                    <div className="cover">
-                                        {r.coverUrl && <img src={r.coverUrl} alt="" />}
-                                    </div>
-                                    <div>
+                                    <button className="card-open" onClick={() => setPreview(r)}>
+                                        <div className="cover">
+                                            {r.coverUrl && <img src={r.coverUrl} alt="" />}
+                                        </div>
+                                    </button>
+
+                                    <button className="card-open" onClick={() => setPreview(r)}>
                                         <div className="book-title">{r.title}</div>
                                         <div className="book-meta">{r.author ?? '작가 미상'}</div>
                                         {r.category && <div className="book-meta">{r.category}</div>}
-                                    </div>
+                                    </button>
                                     <p className={r.reason ? 'recommend-reason' : 'recommend-reason empty'}>
                                         {r.reason || '추천 이유를 만들지 못했어요.'}
                                     </p>
@@ -109,6 +114,15 @@ function RecommendPage() {
                         </ul>
                     )}
                 </div>
+            )}
+            {preview && (
+                <BookPreviewModal
+                    key={preview.bookId}
+                    bookId={preview.bookId}
+                    reason={preview.reason || undefined}
+                    defaultStatus="WISHLIST"
+                    onClose={() => setPreview(null)}
+                />
             )}
         </div>
     )

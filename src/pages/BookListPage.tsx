@@ -6,6 +6,7 @@ import type { Book, BookListResponse, Platform, ReadingStatus } from "../types.t
 import { STATUS_LABEL } from "../constants.ts";
 import { clearRecommendCache } from '../recommendCache.ts'
 import ManualBookForm from "../components/ManualBookForm.tsx";
+import BookPreviewModal from "../components/BookPreviewModal.tsx";
 
 const ADD_STATUSES: ReadingStatus[] = ['UNREAD', 'READING', 'COMPLETED', 'WISHLIST']
 
@@ -22,6 +23,8 @@ function BookListPage() {
     const [platforms, setPlatforms] = useState<Platform[]>([])
     const [platformId, setPlatformId] = useState<number | null>(null)
     const [status, setStatus] = useState<ReadingStatus>('UNREAD')
+
+    const [previewId, setPreviewId] = useState<number | null>(null)
 
     // 처음 한 번: 플랫폼 목록
     useEffect(() => {
@@ -124,10 +127,13 @@ function BookListPage() {
                 <ul className="book-grid">
                     {data.list.map(b => (
                         <li key={b.id} className="book-card">
-                            <div className="cover">
-                                {b.cover_url && <img src={b.cover_url} alt="" />}
-                            </div>
-                            <div className="book-title">{b.title}</div>
+                            <button className="card-open" onClick={() => setPreviewId(b.id)}>
+                                <div className="cover">
+                                    {b.cover_url && <img src={b.cover_url} alt="" />}
+                                </div>
+                                <div className="book-title">{b.title}</div>
+                            </button>
+
                             <div className="book-meta">{b.author ?? '작가 미상'}</div>
                             {b.category && <div className="book-meta">{b.category}</div>}
                             <button className="button secondary small" onClick={() => handleAdd(b)}>
@@ -155,6 +161,9 @@ function BookListPage() {
             )}
             {showForm && (
                 <ManualBookForm platforms={platforms} onClose={() => setShowForm(false)} />
+            )}
+            {previewId !== null && (
+                <BookPreviewModal bookId={previewId} onClose={() => setPreviewId(null)} key={previewId}/>
             )}
         </div>
     )
