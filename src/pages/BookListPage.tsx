@@ -2,13 +2,14 @@ import { useEffect, useState } from "react";
 //import type { FormEvent } from "react";
 import type { SubmitEvent } from "react";
 import axios from "axios";
-import type { Book, BookListResponse, Platform, ReadingStatus } from "../types.ts";
+import type { Book, BookListResponse, Platform, ReadingStatus, UserBook } from "../types.ts";
 import { STATUS_LABEL } from "../constants.ts";
 import { clearRecommendCache } from '../recommendCache.ts'
 import ManualBookForm from "../components/ManualBookForm.tsx";
 import BookPreviewModal from "../components/BookPreviewModal.tsx";
 
 const ADD_STATUSES: ReadingStatus[] = ['UNREAD', 'READING', 'COMPLETED', 'WISHLIST']
+const CATEGORY_GROUPS = ['로판', '로맨스', '판타지']
 
 function BookListPage() {
     // 검색
@@ -25,6 +26,8 @@ function BookListPage() {
     const [status, setStatus] = useState<ReadingStatus>('UNREAD')
 
     const [previewId, setPreviewId] = useState<number | null>(null)
+    const [category, setCategory] = useState('')
+    const [ownedIds, setOwnedIds] = useState<Set<number>>(new Set)
 
     // 처음 한 번: 플랫폼 목록
     useEffect(() => {
@@ -38,16 +41,33 @@ function BookListPage() {
 
     // page나 query가 바뀔 때마다: 도서 목록
     useEffect(() => {
-        axios.get<BookListResponse>('/api/books', { params: { page, keyword: query}})
+        axios.get<BookListResponse>('/api/books', { params: { page, keyword: query, category: category || undefined }})
             .then(res => setData(res.data))
             .catch(err => console.error(err))
             .finally(() => setLoading(false))
-    }, [page, query]);
+    }, [page, query, category]);
+
+    const loadOwned = () => {
+        axios.get<{ list: UserBook[] }>('/api/library')
+            .then(res => setOwnedIds(new Set(res.data.list.map(ub => ub.bookId))))
+            .catch(err => console.error(err))
+    }
+
+    useEffect(() => {
+        loadOwned()
+    }, []);
 
     const goToPage = (p: number) => {
         if (p === page) return
         setLoading(true)
         setPage(p)
+    }
+
+    const changeCategory = (value: string) => {
+        if(value === category) return
+        setLoading(true)
+        setPage(1)
+        setCategory(value)
     }
 
     const handleSearch = (e: SubmitEvent) => {
@@ -65,6 +85,7 @@ function BookListPage() {
         axios.post('/api/library', { bookId: book.id, platformId, status })
             .then(() => {
                 clearRecommendCache()
+                loadOwned()
                 alert (`[${book.title}]을(를) 서재에 담았어요.`)
             })
             .catch(err => {
@@ -88,6 +109,10 @@ function BookListPage() {
                     onChange={e => setKeyword(e.target.value)}
                     placeholder="제목으로 검색"
                 />
+                <select className="field" value={category} onChange={e => changeCategory(e.target.value)}>
+                    <option value="">모든 카테고리</option>
+                    {CATEGORY_GROUPS.map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
                 <button type="submit" className="button">검색</button>
             </form>
 
@@ -120,7 +145,7 @@ function BookListPage() {
 
             {loading && <p className="notice">불러오는 중...</p>}
             {!loading && data && data.list.length === 0 && (
-                <p className="notice">'{query}'(으)로 찾은 책이 없어요. 제목 일부만 넣어 보세요.</p>
+                <p className="notice">조건에 맞는 책이 없어요. 검색어나 카테고리를 바꿔 보세요.</p>
             )}
 
             {!loading && data && (
@@ -130,6 +155,7 @@ function BookListPage() {
                             <button className="card-open" onClick={() => setPreviewId(b.id)}>
                                 <div className="cover">
                                     {b.cover_url && <img src={b.cover_url} alt="" />}
+                                    {ownedIds.has(b.id) && <span className="owned-badge">서재에 있음</span>}
                                 </div>
                                 <div className="book-title">{b.title}</div>
                             </button>
