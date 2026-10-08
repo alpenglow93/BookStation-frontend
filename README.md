@@ -15,8 +15,8 @@ React, TypeScript, Vite, axios, react-router-dom
 | 경로 | 화면 | 기능 |
 | --- | --- | --- |
 | `/` | 내 서재 | 상태 탭, 카테고리·플랫폼 필터, 제목 검색, 상태·평점 변경, 삭제, 상세 보기(줄거리, 메모) |
-| `/books` | 도서 검색 | 제목 검색, 페이지 이동, 구매처와 상태를 골라 서재에 담기, 직접 등록 |
-| `/recommend` | AI 추천 | 카테고리별 추천, 책마다 AI가 쓴 추천 이유 |
+| `/books` | 도서 검색 | 제목 검색, 페이지 이동, 구매처와 상태를 골라 서재에 담기, 직접 등록, 상세 보기(줄거리), 바로 담기 |
+| `/recommend` | AI 추천 | 카테고리별 추천, 책마다 AI가 쓴 추천 이유, 상세 보기(줄거리), 바로 담기 |
 
 ## 구조
 
@@ -27,8 +27,9 @@ src/
 │  ├─ BookListPage.tsx     도서 검색
 │  └─ RecommendPage.tsx    AI 추천
 ├─ components/
-│  ├─ BookDetailModal.tsx  도서 상세, 메모 수정
-│  └─ ManualBookForm.tsx  도서 직접 등록
+│  ├─ BookDetailModal.tsx   도서 상세, 메모 수정
+│  ├─ ManualBookForm.tsx    도서 직접 등록
+│  └─ BookPreviewModal.tsx  검색·추천 상세, 담기
 ├─ types.ts                API 응답 타입
 ├─ constants.ts            상태값 한글 표기
 ├─ recommendCache.ts       추천 결과 저장/무효화
